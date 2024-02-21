@@ -1,55 +1,51 @@
+const url = 'http://localhost:3030/jsonstore/messenger';
+
+const messages = document.getElementById('messages');
+
 function attachEvents() {
     let sendBtn = document.getElementById('submit');
-    sendBtn.addEventListener('click', (e) => {
-        e.preventDefault();
+    sendBtn.addEventListener('click', postMessage);
 
-        let name = document.querySelector('input[name="author"]').value;
-        let message = document.querySelector('input[name="content"]').value;
+    let refreshBtn = document.getElementById('refresh');
+    refreshBtn.addEventListener('click', loadAllMessages);
+};
 
-        let data = {
-            author: name,
-            content: message,
-        };
+async function loadAllMessages() {
+    const res = await fetch(url);
+    const data = await res.json();
 
-        fetch('http://localhost:3030/jsonstore/messenger', {
-            method: 'POST', 
+    //messages
+    messages.value = Object.values(data).map(({ author, content }) => `${author}: ${content}`).join('\n');
+};
+
+async function postMessage() {
+
+    const [author, content] = [document.querySelector('input[name="author"]'), document.querySelector('input[name="content"]')];
+
+    if (author.value === '' || content.value === '') {
+        return;
+    };
+
+    
+    await request(url, { author: author.value, content: content.value });
+    author.value = '';
+    content.value = '';
+};
+
+async function request(url, option) {
+    if (option) {
+        option = {
+            method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(data)
-        })
-        .then(res => {
-            if (!res.ok) {
-                throw new Error('Failed to send message');
-            }
-            return res.json();
-        })
-        .then(() => {
-            document.querySelector('input[name="author"]').value = '';
-            document.querySelector('input[name="content"]').value = '';
-        })
-        .catch(error => console.error('Error:', error)); 
-    });
+            body: JSON.stringify(option)
+        };
 
-    let refreshBtn = document.getElementById('refresh');
-    refreshBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        let textarea = document.getElementById('messages');
-        textarea.value = ''; 
-        fetch('http://localhost:3030/jsonstore/messenger')
-            .then(res => {
-                if (!res.ok) {
-                    throw new Error('Failed to fetch messages');
-                }
-                return res.json();
-            })
-            .then(data => {
-                Object.values(data).forEach(x => {
-                    textarea.value += `${x.author}: ${x.content}\n`;
-                });
-            })
-            .catch(error => console.error('Error:', error)); 
-    });
+    };
+    const response = await fetch(url, option);
+
+    return response.json()
 }
 
 attachEvents();
