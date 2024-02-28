@@ -1,0 +1,17 @@
+{
+  "name": "library-testing",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "chai": "^4.3.4",
+    "mocha": "^10.2.0",
+    "playwright-chromium": "^1.41.2"
+  }
+}
